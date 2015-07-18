@@ -98,7 +98,7 @@
 
         <meta-data
             android:name="gcm_sender_id"
-            android:value="461748630068" />
+            android:value="@string/gcm_sender_id" />
 
     </application>
 

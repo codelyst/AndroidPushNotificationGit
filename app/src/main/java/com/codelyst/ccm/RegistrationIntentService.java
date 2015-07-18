@@ -17,13 +17,18 @@
 
 /*
  * Use this meta data in your manifests file for get
- *         <meta-data android:name="gcm_sender_id" android:value="XXXXXXX" />
+ *         <meta-data
+            android:name="gcm_sender_id"
+            android:value="@string/gcm_sender_id" />
+
 
 * */
 package com.codelyst.ccm;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -38,8 +43,8 @@ public class RegistrationIntentService extends IntentService {
 
     private static final String TAG = "RegIntentService";
     private static final String[] TOPICS = {"global"};
-    private static final String GCM_SENDER_META_DATA_KEY = "gcm_sender_id";
-    private static final String SENT_TOKEN_TO_SERVER = "sendTokenToServer";
+    public static final String GCM_SENDER_META_DATA_KEY = "gcm_sender_id";
+    public static final String SENT_TOKEN_TO_SERVER = "sendTokenToServer";
     public static final String REGISTRATION_COMPLETE = "REGISTRATION_COMPLETE";
     public static final String GCM_TOKEN = "GCM_TOKEN";
 
@@ -50,7 +55,7 @@ public class RegistrationIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String token = null;
         try {
             // In the (unlikely) event that multiple refresh operations occur simultaneously,
@@ -61,13 +66,15 @@ public class RegistrationIntentService extends IntentService {
                 // are local.
                 // [START get_token]
                 InstanceID instanceID = InstanceID.getInstance(this);
-                token = instanceID.getToken(Utils.getMetaDataFromManifests(getApplicationContext(), GCM_SENDER_META_DATA_KEY),
+                String gcm_sender_id = Utils.getMetaDataFromManifests(getApplicationContext(), GCM_SENDER_META_DATA_KEY);
+
+                Log.d(TAG,gcm_sender_id);
+                token = instanceID.getToken(gcm_sender_id,
                         GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
                 // [END get_token]
                 Log.i(TAG, "GCM Registration Token: " + token);
 
-                // TODO: Implement this method to send any registration to your app's servers.
-                sendRegistrationToServer(token);
+                sharedPreferences.edit().putBoolean(GCM_TOKEN, true).apply();
 
                 // Subscribe to topic channels
                 subscribeTopics(token);
@@ -83,8 +90,12 @@ public class RegistrationIntentService extends IntentService {
 
         if (token != null) {
             registrationComplete.putExtra(GCM_TOKEN, token);
+            sharedPreferences.edit().putString(GCM_TOKEN, token).apply();
+
         } else {
             registrationComplete.putExtra(GCM_TOKEN, "");
+            sharedPreferences.edit().putString(GCM_TOKEN, "").apply();
+
         }
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
