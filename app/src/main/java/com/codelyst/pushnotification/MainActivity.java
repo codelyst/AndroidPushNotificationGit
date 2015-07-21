@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                         PreferenceManager.getDefaultSharedPreferences(context);
                 String sentToken = sharedPreferences
                         .getString(RegistrationIntentService.GCM_TOKEN, null);
-                if (sentToken != null && sentToken.length() >0) {
+                if (sentToken != null && sentToken.length() > 0) {
                     sendTokenToServer(sentToken);
                     mInformationTextView.setText(sentToken);
 
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendTokenToServer(String sentToken) {
-        Toast.makeText(getApplicationContext(),sentToken,Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), sentToken, Toast.LENGTH_LONG).show();
     }
 
     @Override
